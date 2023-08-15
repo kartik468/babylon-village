@@ -25,17 +25,40 @@ const createScene = () => {
     new BABYLON.Vector3(1, 1, 0)
   );
 
-  /**** Materials *****/
+  const ground = buildGround();
+  const box = buildBox();
+  const roof = buildRoof();
+
+  const house = BABYLON.Mesh.MergeMeshes(
+    [box, roof],
+    true,
+    false,
+    null,
+    false,
+    true
+  );
+
+  return scene;
+};
+
+/******Build Functions***********/
+const buildGround = () => {
   //color
   const groundMat = new BABYLON.StandardMaterial("groundMat");
   groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
 
+  const ground = BABYLON.MeshBuilder.CreateGround("ground", {
+    width: 10,
+    height: 10,
+  });
+  ground.material = groundMat;
+
+  return ground;
+};
+
+const buildBox = () => {
   //texture
-  const roofMat = new BABYLON.StandardMaterial("roofMat");
-  roofMat.diffuseTexture = new BABYLON.Texture(
-    "https://assets.babylonjs.com/environments/roof.jpg"
-  );
-  const boxMat = new BABYLON.StandardMaterial("boxMat");
+  const boxMat = new BABYLON.StandardMaterial("roofMat");
   boxMat.diffuseTexture = new BABYLON.Texture(
     "https://assets.babylonjs.com/environments/cubehouse.png"
   );
@@ -56,6 +79,16 @@ const createScene = () => {
   box.material = boxMat;
   box.position.y = 0.5;
 
+  return box;
+};
+
+const buildRoof = () => {
+  //texture
+  const roofMat = new BABYLON.StandardMaterial("roofMat");
+  roofMat.diffuseTexture = new BABYLON.Texture(
+    "https://assets.babylonjs.com/environments/roof.jpg"
+  );
+
   const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {
     diameter: 1.3,
     height: 1.2,
@@ -66,14 +99,9 @@ const createScene = () => {
   roof.rotation.z = Math.PI / 2;
   roof.position.y = 1.22;
 
-  const ground = BABYLON.MeshBuilder.CreateGround("ground", {
-    width: 10,
-    height: 10,
-  });
-  ground.material = groundMat;
-
-  return scene;
+  return roof;
 };
+
 const scene = await createScene();
 
 engine.runRenderLoop(() => {
