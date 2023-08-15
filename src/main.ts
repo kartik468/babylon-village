@@ -25,15 +25,8 @@ const createScene = () => {
     new BABYLON.Vector3(1, 1, 0)
   );
 
-  const box = BABYLON.MeshBuilder.CreateBox("box", {
-    width: 2,
-    height: 1.5,
-    depth: 3,
-  });
-  box.position = new BABYLON.Vector3(-2, 4.2, 0.1);
-
-  box.rotation.y = Math.PI / 4;
-  box.rotation.y = BABYLON.Tools.ToRadians(45);
+  const box = BABYLON.MeshBuilder.CreateBox("box", {});
+  box.position.y = 0.5;
 
   const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {
     diameter: 1.3,
