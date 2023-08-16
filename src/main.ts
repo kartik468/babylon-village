@@ -30,6 +30,8 @@ const createScene = () => {
     new BABYLON.Vector3(1, 1, 0)
   );
 
+  // addDude(scene);
+
   const ground = GroundMesh.buildGround();
 
   buildHouses();
@@ -38,6 +40,21 @@ const createScene = () => {
 
   AxesMesh.buildAxes(6, scene);
   return scene;
+};
+
+const addDude = (scene: BABYLON.Scene) => {
+  // https://playground.babylonjs.com/#SFW46K#1
+  BABYLON.SceneLoader.ImportMeshAsync(
+    "him",
+    "/scenes/Dude/",
+    "Dude.babylon",
+    scene
+  ).then((result) => {
+    var dude = result.meshes[0];
+    dude.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
+
+    scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+  });
 };
 
 const buildHouses = () => {
