@@ -2,7 +2,14 @@ import * as BABYLON from "@babylonjs/core";
 import earcut from "earcut";
 
 export class CarMesh {
-  static buildCar(scene: BABYLON.Scene) {
+  car: BABYLON.Mesh;
+
+  constructor(private scene: BABYLON.Scene) {
+    this.scene = scene;
+    this.car = this.buildCar();
+  }
+
+  buildCar() {
     //base
     const outline = [
       new BABYLON.Vector3(-0.3, 0, -0.1),
@@ -46,7 +53,7 @@ export class CarMesh {
         faceUV: faceUV,
         wrap: true,
       },
-      scene,
+      this.scene,
       earcut
     );
     car.material = carMat;
@@ -114,5 +121,51 @@ export class CarMesh {
     wheelLF.position.y = -0.2 - 0.035;
 
     return car;
+  }
+
+  animateWheels() {
+    const wheelRB = this.scene.getMeshByName("wheelRB");
+    const wheelRF = this.scene.getMeshByName("wheelRF");
+    const wheelLB = this.scene.getMeshByName("wheelLB");
+    const wheelLF = this.scene.getMeshByName("wheelLF");
+    //   console.log(wheelRB.animations)
+    this.scene.beginAnimation(wheelRB, 0, 30, true);
+    this.scene.beginAnimation(wheelRF, 0, 30, true);
+    this.scene.beginAnimation(wheelLB, 0, 30, true);
+    this.scene.beginAnimation(wheelLF, 0, 30, true);
+  }
+
+  animateCar() {
+    const animCar = new BABYLON.Animation(
+      "carAnimation",
+      "position.z",
+      30,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+
+    const carKeys = [];
+
+    carKeys.push({
+      frame: 0,
+      value: 8,
+    });
+
+    carKeys.push({
+      frame: 150,
+      value: -7,
+    });
+
+    carKeys.push({
+      frame: 200,
+      value: -7,
+    });
+
+    animCar.setKeys(carKeys);
+
+    this.car.animations = [];
+    this.car.animations.push(animCar);
+
+    this.scene.beginAnimation(this.car, 0, 200, true);
   }
 }

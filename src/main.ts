@@ -85,21 +85,21 @@ const buildHouses = () => {
 };
 
 const buildCar = (scene: BABYLON.Scene) => {
-  const car = CarMesh.buildCar(scene);
-  car.rotation.x = -Math.PI / 2;
+  const carMeshObj = new CarMesh(scene);
+  const car = carMeshObj.car;
+  //   car.rotation.x = -Math.PI / 2;
+  car.position.y = 0.16;
+  car.position.x = 3;
+  car.position.z = 8;
 
-  const wheelRB = scene.getMeshByName("wheelRB");
-  const wheelRF = scene.getMeshByName("wheelRF");
-  const wheelLB = scene.getMeshByName("wheelLB");
-  const wheelLF = scene.getMeshByName("wheelLF");
-  //   console.log(wheelRB.animations)
-  scene.beginAnimation(wheelRB, 0, 30, true);
-  scene.beginAnimation(wheelRF, 0, 30, true);
-  scene.beginAnimation(wheelLB, 0, 30, true);
-  scene.beginAnimation(wheelLF, 0, 30, true);
+  car.rotation = new BABYLON.Vector3(-Math.PI / 2, 0, Math.PI / 2);
+
+  carMeshObj.animateWheels();
+
+  carMeshObj.animateCar();
+
+  return carMeshObj.car;
 };
-
-// ===========
 
 const scene = await createScene();
 
