@@ -1,0 +1,2 @@
+- Create Separate files for mesh
+- start from here : https://doc.babylonjs.com/features/introductionToFeatures/chap3/animation
