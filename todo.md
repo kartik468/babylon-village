@@ -1,1 +1,1 @@
-- start from here : https://doc.babylonjs.com/features/introductionToFeatures/chap3/walkpath
+- start from here : https://doc.babylonjs.com/features/introductionToFeatures/chap5
