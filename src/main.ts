@@ -6,6 +6,7 @@ import { CarMesh } from "./car.mesh";
 import { HouseMesh } from "./house.mesh";
 import { GroundMesh } from "./ground.mesh";
 import { AxesMesh } from "./axes.mesh";
+import { Slide } from "./helper/Slide";
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 console.log(canvas);
@@ -32,11 +33,12 @@ const createScene = () => {
 
   // addDude(scene);
 
-  const ground = GroundMesh.buildGround();
+  addSphereDemo(scene);
+  // const ground = GroundMesh.buildGround();
 
-  buildHouses();
+  // buildHouses();
 
-  buildCar(scene);
+  // buildCar(scene);
 
   AxesMesh.buildAxes(6, scene);
   return scene;
@@ -54,6 +56,46 @@ const addDude = (scene: BABYLON.Scene) => {
     dude.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
 
     scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+  });
+};
+
+const addSphereDemo = (scene: BABYLON.Scene) => {
+  const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 0.25 });
+  sphere.position = new BABYLON.Vector3(2, 0, 2);
+
+  //end points for the line sequence in an array
+  //y component can be non zero
+  const points = [];
+  points.push(new BABYLON.Vector3(2, 0, 2));
+  points.push(new BABYLON.Vector3(2, 0, -2));
+  points.push(new BABYLON.Vector3(-2, 0, -2));
+  points.push(points[0]); //close the triangle;
+
+  BABYLON.MeshBuilder.CreateLines("triangle", { points: points });
+
+  const track: any = [];
+  track.push(new Slide(Math.PI / 2, 4));
+  track.push(new Slide((3 * Math.PI) / 4, 8));
+  track.push(new Slide((3 * Math.PI) / 4, 8 + 4 * Math.sqrt(2)));
+
+  let distance = 0;
+  let step = 0.05;
+  let p = 0;
+
+  scene.onBeforeRenderObservable.add(() => {
+    sphere.movePOV(0, 0, step);
+    distance += step;
+
+    if (distance > track[p].dist) {
+      sphere.rotate(BABYLON.Axis.Y, track[p].turn, BABYLON.Space.LOCAL);
+      p += 1;
+      p %= track.length;
+      if (p === 0) {
+        distance = 0;
+        sphere.position = new BABYLON.Vector3(2, 0, 2); //reset to initial conditions
+        sphere.rotation = BABYLON.Vector3.Zero(); //prevents error accumulation
+      }
+    }
   });
 };
 
