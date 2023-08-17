@@ -8,6 +8,7 @@ import { GroundMesh } from "./ground.mesh";
 import { AxesMesh } from "./axes.mesh";
 import { Slide } from "./helper/Slide";
 import { SkyMesh } from "./sky.mesh";
+import { FountainMesh } from "./fountain.mesh";
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 console.log(canvas);
@@ -51,6 +52,10 @@ const createScene = () => {
   addSky(scene);
 
   addTrees(scene);
+
+  addUFO(scene);
+
+  addFountain(scene);
 
   AxesMesh.buildAxes(6, scene);
   return scene;
@@ -293,6 +298,9 @@ const addSky = (scene: BABYLON.Scene) => {
   const sky = new SkyMesh(scene);
 };
 
+const addFountain = (scene: BABYLON.Scene) => {
+  const fountain = new FountainMesh(scene);
+};
 const addTrees = (scene: BABYLON.Scene) => {
   const spriteManagerTrees = new BABYLON.SpriteManager(
     "treesManager",
@@ -316,6 +324,21 @@ const addTrees = (scene: BABYLON.Scene) => {
     tree.position.z = Math.random() * -35 + 8;
     tree.position.y = 0.5;
   }
+};
+
+const addUFO = (scene: BABYLON.Scene) => {
+  const spriteManagerUFO = new BABYLON.SpriteManager(
+    "UFOManager",
+    "/environments/ufo.png",
+    1,
+    { width: 128, height: 76 }
+  );
+  const ufo = new BABYLON.Sprite("ufo", spriteManagerUFO);
+  ufo.playAnimation(0, 16, true, 125);
+  ufo.position.y = 5;
+  ufo.position.z = 0;
+  ufo.width = 2;
+  ufo.height = 1;
 };
 
 const scene = await createScene();
