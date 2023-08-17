@@ -1,3 +1,3 @@
 export class Slide {
-  constructor(private turn: number, private dist: number) {}
+  constructor(public turn: number, public dist: number) {}
 }

@@ -31,20 +31,31 @@ const createScene = () => {
     new BABYLON.Vector3(1, 1, 0)
   );
 
-  // addDude(scene);
+  addDude(scene);
 
-  addSphereDemo(scene);
-  // const ground = GroundMesh.buildGround();
+  // addSphereDemo(scene);
+  const ground = GroundMesh.buildGround();
 
-  // buildHouses();
+  buildHouses();
 
-  // buildCar(scene);
+  buildCar(scene);
 
   AxesMesh.buildAxes(6, scene);
   return scene;
 };
 
 const addDude = (scene: BABYLON.Scene) => {
+  const track: Slide[] = [];
+  track.push(new Slide(86, 7));
+  track.push(new Slide(-85, 14.8));
+  track.push(new Slide(-93, 16.5));
+  track.push(new Slide(48, 25.5));
+  track.push(new Slide(-112, 30.5));
+  track.push(new Slide(-72, 33.2));
+  track.push(new Slide(42, 37.5));
+  track.push(new Slide(-98, 45.2));
+  track.push(new Slide(0, 47));
+
   // https://playground.babylonjs.com/#SFW46K#1
   BABYLON.SceneLoader.ImportMeshAsync(
     "him",
@@ -53,9 +64,41 @@ const addDude = (scene: BABYLON.Scene) => {
     scene
   ).then((result) => {
     var dude = result.meshes[0];
-    dude.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
+    dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
+
+    dude.position = new BABYLON.Vector3(-6, 0, 0);
+    dude.rotate(
+      BABYLON.Axis.Y,
+      BABYLON.Tools.ToRadians(-95),
+      BABYLON.Space.LOCAL
+    );
+    const startRotation = dude.rotationQuaternion.clone();
 
     scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+
+    let distance = 0;
+    let step = 0.015;
+    let p = 0;
+
+    scene.onBeforeRenderObservable.add(() => {
+      dude.movePOV(0, 0, step);
+      distance += step;
+
+      if (distance > track[p].dist) {
+        dude.rotate(
+          BABYLON.Axis.Y,
+          BABYLON.Tools.ToRadians(track[p].turn),
+          BABYLON.Space.LOCAL
+        );
+        p += 1;
+        p %= track.length;
+        if (p === 0) {
+          distance = 0;
+          dude.position = new BABYLON.Vector3(-6, 0, 0);
+          dude.rotationQuaternion = startRotation.clone();
+        }
+      }
+    });
   });
 };
 
