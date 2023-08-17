@@ -7,6 +7,7 @@ import { HouseMesh } from "./house.mesh";
 import { GroundMesh } from "./ground.mesh";
 import { AxesMesh } from "./axes.mesh";
 import { Slide } from "./helper/Slide";
+import { SkyMesh } from "./sky.mesh";
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 console.log(canvas);
@@ -28,6 +29,9 @@ const createScene = () => {
     new BABYLON.Vector3(0, 0, 0)
   );
   camera.attachControl(canvas, true);
+
+  camera.upperBetaLimit = Math.PI / 2.2;
+
   const light = new BABYLON.HemisphericLight(
     "light",
     new BABYLON.Vector3(1, 1, 0)
@@ -35,7 +39,7 @@ const createScene = () => {
 
   addHitBox(scene);
   // addDudeWalkingInVillage(scene);
-  addDudeWalkingCollission(scene);
+  addDudeWalkingCollision(scene);
 
   // addSphereDemo(scene);
   const ground = GroundMesh.buildGround();
@@ -43,6 +47,10 @@ const createScene = () => {
   buildHouses();
 
   buildCar(scene);
+
+  addSky(scene);
+
+  addTrees(scene);
 
   AxesMesh.buildAxes(6, scene);
   return scene;
@@ -63,7 +71,7 @@ const addHitBox = (scene: BABYLON.Scene) => {
   hitBox.position.z = -5;
 };
 
-const addDudeWalkingCollission = (scene: BABYLON.Scene) => {
+const addDudeWalkingCollision = (scene: BABYLON.Scene) => {
   const track: Slide[] = [];
   track.push(new Slide(180, 2.5));
   track.push(new Slide(0, 5));
@@ -279,6 +287,35 @@ const buildCar = (scene: BABYLON.Scene) => {
   carMeshObj.animateCar();
 
   return carMeshObj.car;
+};
+
+const addSky = (scene: BABYLON.Scene) => {
+  const sky = new SkyMesh(scene);
+};
+
+const addTrees = (scene: BABYLON.Scene) => {
+  const spriteManagerTrees = new BABYLON.SpriteManager(
+    "treesManager",
+    "textures/palm.png",
+    2000,
+    { width: 512, height: 1024 },
+    scene
+  );
+
+  //We create trees at random positions
+  for (let i = 0; i < 500; i++) {
+    const tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+    tree.position.x = Math.random() * -30;
+    tree.position.z = Math.random() * 20 + 8;
+    tree.position.y = 0.5;
+  }
+
+  for (let i = 0; i < 500; i++) {
+    const tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+    tree.position.x = Math.random() * 25 + 7;
+    tree.position.z = Math.random() * -35 + 8;
+    tree.position.y = 0.5;
+  }
 };
 
 const scene = await createScene();
