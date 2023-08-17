@@ -13,6 +13,8 @@ console.log(canvas);
 
 const engine = new BABYLON.Engine(canvas);
 
+let carReady = true;
+
 // ===========
 const createScene = () => {
   const scene = new BABYLON.Scene(engine);
@@ -31,7 +33,9 @@ const createScene = () => {
     new BABYLON.Vector3(1, 1, 0)
   );
 
-  addDude(scene);
+  addHitBox(scene);
+  // addDudeWalkingInVillage(scene);
+  addDudeWalkingCollission(scene);
 
   // addSphereDemo(scene);
   const ground = GroundMesh.buildGround();
@@ -44,7 +48,81 @@ const createScene = () => {
   return scene;
 };
 
-const addDude = (scene: BABYLON.Scene) => {
+const addHitBox = (scene: BABYLON.Scene) => {
+  const wireMat = new BABYLON.StandardMaterial("wireMat");
+  wireMat.wireframe = true;
+
+  const hitBox = BABYLON.MeshBuilder.CreateBox("hitBox", {
+    width: 0.5,
+    height: 0.6,
+    depth: 4.5,
+  });
+  hitBox.material = wireMat;
+  hitBox.position.x = 3.1;
+  hitBox.position.y = 0.3;
+  hitBox.position.z = -5;
+};
+
+const addDudeWalkingCollission = (scene: BABYLON.Scene) => {
+  const track: Slide[] = [];
+  track.push(new Slide(180, 2.5));
+  track.push(new Slide(0, 5));
+  BABYLON.SceneLoader.ImportMeshAsync(
+    "him",
+    "/scenes/Dude/",
+    "Dude.babylon",
+    scene
+  ).then((result) => {
+    var dude = result.meshes[0];
+    dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
+
+    dude.position = new BABYLON.Vector3(1.5, 0, -6.9);
+    dude.rotate(
+      BABYLON.Axis.Y,
+      BABYLON.Tools.ToRadians(-90),
+      BABYLON.Space.LOCAL
+    );
+    const startRotation = dude.rotationQuaternion.clone();
+
+    scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+
+    let distance = 0;
+    let step = 0.015;
+    let p = 0;
+
+    scene.onBeforeRenderObservable.add(() => {
+      const carMesh = scene.getMeshByName("car");
+      const hitBox = scene.getMeshByName("hitBox");
+      if (carReady) {
+        if (
+          !dude.getChildren()[1].intersectsMesh(hitBox) &&
+          carMesh.intersectsMesh(hitBox)
+        ) {
+          return;
+        }
+      }
+      dude.movePOV(0, 0, step);
+      distance += step;
+
+      if (distance > track[p].dist) {
+        dude.rotate(
+          BABYLON.Axis.Y,
+          BABYLON.Tools.ToRadians(track[p].turn),
+          BABYLON.Space.LOCAL
+        );
+        p += 1;
+        p %= track.length;
+        if (p === 0) {
+          distance = 0;
+          dude.position = new BABYLON.Vector3(1.5, 0, -6.9);
+          dude.rotationQuaternion = startRotation.clone();
+        }
+      }
+    });
+  });
+};
+
+const addDudeWalkingInVillage = (scene: BABYLON.Scene) => {
   const track: Slide[] = [];
   track.push(new Slide(86, 7));
   track.push(new Slide(-85, 14.8));
