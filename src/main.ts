@@ -26,10 +26,10 @@ const createScene = () => {
   /**** Set camera and light *****/
   const camera = new BABYLON.ArcRotateCamera(
     "camera",
-    -Math.PI / 2,
+    Math.PI / 2,
     Math.PI / 2.5,
-    15,
-    new BABYLON.Vector3(0, 0, 0)
+    150,
+    new BABYLON.Vector3(0, 60, 0)
   );
   camera.attachControl(canvas, true);
 
@@ -48,8 +48,8 @@ const createScene = () => {
   addDayToNightControl(scene, light);
 
   addHitBox(scene);
-  // addDudeWalkingInVillage(scene, shadowGenerator);
-  addDudeWalkingCollision(scene, shadowGenerator);
+  addDudeWalkingInVillage(scene, shadowGenerator, camera);
+  // addDudeWalkingCollision(scene, shadowGenerator);
 
   // addSphereDemo(scene);
   const ground = GroundMesh.buildGround();
@@ -155,7 +155,8 @@ const addDudeWalkingCollision = (
 
 const addDudeWalkingInVillage = (
   scene: BABYLON.Scene,
-  shadowGenerator: BABYLON.ShadowGenerator
+  shadowGenerator: BABYLON.ShadowGenerator,
+  camera: BABYLON.ArcRotateCamera
 ) => {
   const track: Slide[] = [];
   track.push(new Slide(86, 7));
@@ -179,6 +180,8 @@ const addDudeWalkingInVillage = (
     dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
 
     shadowGenerator.addShadowCaster(dude, true);
+
+    camera.parent = dude;
 
     dude.position = new BABYLON.Vector3(-6, 0, 0);
     dude.rotate(
