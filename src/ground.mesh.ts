@@ -28,5 +28,7 @@ export class GroundMesh {
     );
     largeGround.material = largeGroundMat;
     largeGround.position.y = -0.01;
+
+    return ground;
   }
 }

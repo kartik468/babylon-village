@@ -1,6 +1,7 @@
 import earcut from "earcut";
 import "./style.css";
 import * as BABYLON from "@babylonjs/core";
+import * as GUI from "@babylonjs/gui";
 import { Inspector } from "@babylonjs/inspector";
 import { CarMesh } from "./car.mesh";
 import { HouseMesh } from "./house.mesh";
@@ -9,6 +10,7 @@ import { AxesMesh } from "./axes.mesh";
 import { Slide } from "./helper/Slide";
 import { SkyMesh } from "./sky.mesh";
 import { FountainMesh } from "./fountain.mesh";
+import { LampMesh } from "./lamp.mesh";
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 console.log(canvas);
@@ -33,17 +35,26 @@ const createScene = () => {
 
   camera.upperBetaLimit = Math.PI / 2.2;
 
-  const light = new BABYLON.HemisphericLight(
-    "light",
-    new BABYLON.Vector3(1, 1, 0)
+  const light = new BABYLON.DirectionalLight(
+    "dir01",
+    new BABYLON.Vector3(0, -1, 1),
+    scene
   );
+  light.position = new BABYLON.Vector3(0, 50, -100);
+
+  // Shadow generator
+  const shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+
+  addDayToNightControl(scene, light);
 
   addHitBox(scene);
-  // addDudeWalkingInVillage(scene);
-  addDudeWalkingCollision(scene);
+  // addDudeWalkingInVillage(scene, shadowGenerator);
+  addDudeWalkingCollision(scene, shadowGenerator);
 
   // addSphereDemo(scene);
   const ground = GroundMesh.buildGround();
+  (ground.material as BABYLON.StandardMaterial).maxSimultaneousLights = 5;
+  ground.receiveShadows = true;
 
   buildHouses();
 
@@ -53,9 +64,11 @@ const createScene = () => {
 
   addTrees(scene);
 
-  addUFO(scene);
+  // addUFO(scene);
 
   addFountain(scene);
+
+  addLamps(scene);
 
   AxesMesh.buildAxes(6, scene);
   return scene;
@@ -76,7 +89,10 @@ const addHitBox = (scene: BABYLON.Scene) => {
   hitBox.position.z = -5;
 };
 
-const addDudeWalkingCollision = (scene: BABYLON.Scene) => {
+const addDudeWalkingCollision = (
+  scene: BABYLON.Scene,
+  shadowGenerator: BABYLON.ShadowGenerator
+) => {
   const track: Slide[] = [];
   track.push(new Slide(180, 2.5));
   track.push(new Slide(0, 5));
@@ -88,6 +104,8 @@ const addDudeWalkingCollision = (scene: BABYLON.Scene) => {
   ).then((result) => {
     var dude = result.meshes[0];
     dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
+
+    shadowGenerator.addShadowCaster(dude, true);
 
     dude.position = new BABYLON.Vector3(1.5, 0, -6.9);
     dude.rotate(
@@ -135,7 +153,10 @@ const addDudeWalkingCollision = (scene: BABYLON.Scene) => {
   });
 };
 
-const addDudeWalkingInVillage = (scene: BABYLON.Scene) => {
+const addDudeWalkingInVillage = (
+  scene: BABYLON.Scene,
+  shadowGenerator: BABYLON.ShadowGenerator
+) => {
   const track: Slide[] = [];
   track.push(new Slide(86, 7));
   track.push(new Slide(-85, 14.8));
@@ -156,6 +177,8 @@ const addDudeWalkingInVillage = (scene: BABYLON.Scene) => {
   ).then((result) => {
     var dude = result.meshes[0];
     dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
+
+    shadowGenerator.addShadowCaster(dude, true);
 
     dude.position = new BABYLON.Vector3(-6, 0, 0);
     dude.rotate(
@@ -326,19 +349,74 @@ const addTrees = (scene: BABYLON.Scene) => {
   }
 };
 
-const addUFO = (scene: BABYLON.Scene) => {
-  const spriteManagerUFO = new BABYLON.SpriteManager(
-    "UFOManager",
-    "/environments/ufo.png",
-    1,
-    { width: 128, height: 76 }
-  );
-  const ufo = new BABYLON.Sprite("ufo", spriteManagerUFO);
-  ufo.playAnimation(0, 16, true, 125);
-  ufo.position.y = 5;
-  ufo.position.z = 0;
-  ufo.width = 2;
-  ufo.height = 1;
+// const addUFO = (scene: BABYLON.Scene) => {
+//   const spriteManagerUFO = new BABYLON.SpriteManager(
+//     "UFOManager",
+//     "/environments/ufo.png",
+//     1,
+//     { width: 128, height: 76 }
+//   );
+//   const ufo = new BABYLON.Sprite("ufo", spriteManagerUFO);
+//   ufo.playAnimation(0, 16, true, 125);
+//   ufo.position.y = 5;
+//   ufo.position.z = 0;
+//   ufo.width = 2;
+//   ufo.height = 1;
+// };
+
+const addLamps = (scene: BABYLON.Scene) => {
+  const lamp = new LampMesh(scene).lamp;
+  lamp.position = new BABYLON.Vector3(2, 0, 2);
+  lamp.rotation = BABYLON.Vector3.Zero();
+  lamp.rotation.y = -Math.PI / 4;
+  lamp.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
+
+  const lamp3 = lamp.clone("lamp3");
+  lamp3.position.z = -8;
+
+  const lamp1 = lamp.clone("lamp1");
+  lamp1.position.x = -8;
+  lamp1.position.z = 1.2;
+  lamp1.rotation.y = Math.PI / 2;
+
+  const lamp2 = lamp1.clone("lamp2");
+  lamp2.position.x = -2.7;
+  lamp2.position.z = 0.8;
+  lamp2.rotation.y = -Math.PI / 2;
+};
+
+const addDayToNightControl = (scene: BABYLON.Scene, light: BABYLON.Light) => {
+  // GUI
+  const adt = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+  const panel = new GUI.StackPanel();
+  panel.width = "220px";
+  panel.top = "-25px";
+  panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+  panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  adt.addControl(panel);
+
+  const header = new GUI.TextBlock();
+  header.text = "Night to Day";
+  header.height = "30px";
+  header.color = "white";
+  panel.addControl(header);
+
+  const slider = new GUI.Slider();
+  slider.minimum = 0;
+  slider.maximum = 1;
+  slider.borderColor = "black";
+  slider.color = "gray";
+  slider.background = "white";
+  slider.value = 1;
+  slider.height = "20px";
+  slider.width = "200px";
+  slider.onValueChangedObservable.add((value) => {
+    if (light) {
+      light.intensity = value;
+    }
+  });
+  panel.addControl(slider);
 };
 
 const scene = await createScene();
