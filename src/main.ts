@@ -24,16 +24,49 @@ const createScene = () => {
   const scene = new BABYLON.Scene(engine);
 
   /**** Set camera and light *****/
-  const camera = new BABYLON.ArcRotateCamera(
-    "camera",
-    Math.PI / 2,
-    Math.PI / 2.5,
-    150,
-    new BABYLON.Vector3(0, 60, 0)
-  );
-  camera.attachControl(canvas, true);
+  // const camera = new BABYLON.ArcRotateCamera(
+  //   "camera",
+  //   -Math.PI / 2,
+  //   Math.PI / 2.5,
+  //   15,
+  //   new BABYLON.Vector3(0, 0, 0)
+  // );
 
-  camera.upperBetaLimit = Math.PI / 2.2;
+  // dude shoulder
+  // const camera = new BABYLON.ArcRotateCamera(
+  //   "camera",
+  //   Math.PI / 2,
+  //   Math.PI / 2.5,
+  //   150,
+  //   new BABYLON.Vector3(0, 60, 0)
+  // );
+
+  // This creates and initially positions a follow camera
+  const camera = new BABYLON.FollowCamera(
+    "FollowCam",
+    new BABYLON.Vector3(-6, 0, 0),
+    scene
+  );
+
+  //The goal distance of camera from target
+  camera.radius = 1;
+
+  // The goal height of camera above local oriin (centre) of target
+  camera.heightOffset = 8;
+
+  // The goal rotation of camera around local origin (centre) of target in x y plane
+  camera.rotationOffset = 0;
+
+  //Acceleration of camera in moving from current to goal position
+  camera.cameraAcceleration = 0.005;
+
+  //The speed at which acceleration is halted
+  camera.maxCameraSpeed = 10;
+
+  //camera.target is set after the target's creation
+
+  // This attaches the camera to the canvas
+  camera.attachControl(canvas, true);
 
   const light = new BABYLON.DirectionalLight(
     "dir01",
@@ -181,7 +214,8 @@ const addDudeWalkingInVillage = (
 
     shadowGenerator.addShadowCaster(dude, true);
 
-    camera.parent = dude;
+    // camera.parent = dude;
+    camera.lockedTarget = dude;
 
     dude.position = new BABYLON.Vector3(-6, 0, 0);
     dude.rotate(
